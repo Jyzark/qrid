@@ -4,6 +4,7 @@ import 'package:qrid/controllers/generated_history_controller.dart';
 
 class WiFiQRScreen extends StatefulWidget {
   const WiFiQRScreen({super.key});
+
   @override
   State<WiFiQRScreen> createState() => _WiFiQRScreenState();
 }
@@ -11,6 +12,7 @@ class WiFiQRScreen extends StatefulWidget {
 class _WiFiQRScreenState extends State<WiFiQRScreen> {
   var networkNameTextField = TextEditingController();
   var networkPasswordTextField = TextEditingController();
+
   String? qrData;
   String? networkName;
   String? networkPassword;
@@ -20,11 +22,13 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
     'No Encryption',
   ];
   String? selectedEncryption;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (networkName != null) {
         String wifiString() {
@@ -45,6 +49,7 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
 
         qrData = wifiString();
       }
+
       if (qrData != null && networkName != null) {
         String wifiItemTitle() {
           if (selectedEncryption == 'WPA/WPA2' || selectedEncryption == 'WEP') {

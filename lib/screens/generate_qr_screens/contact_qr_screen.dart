@@ -4,6 +4,7 @@ import 'package:regexpattern/regexpattern.dart';
 
 class ContactQRScreen extends StatefulWidget {
   const ContactQRScreen({super.key});
+
   @override
   State<ContactQRScreen> createState() => _ContactQRScreenState();
 }
@@ -17,6 +18,7 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
   var contactAddressTextField = TextEditingController();
   var contactWebsiteTextField = TextEditingController();
   var contactNoteTextField = TextEditingController();
+
   String? qrData;
   String? contactName;
   String? contactCompany;
@@ -26,11 +28,13 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
   String? contactAddress;
   String? contactWebsite;
   String? contactNote;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (contactName != null && contactPhone != null) {
         String vCardString() {
@@ -38,31 +42,40 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
           formattedVCardString += 'BEGIN:VCARD\n';
           formattedVCardString += 'VERSION:3.0\n';
           formattedVCardString += 'N:${contactName!}\n';
+
           if (contactCompany != null) {
             formattedVCardString += 'ORG:${contactCompany!}\n';
           }
+
           if (contactTitle != null) {
             formattedVCardString += 'TITLE:${contactTitle!}\n';
           }
+
           formattedVCardString += 'TEL:${contactPhone!}\n';
+
           if (contactEmail != null) {
             formattedVCardString += 'EMAIL:${contactEmail!}\n';
           }
+
           if (contactAddress != null) {
             formattedVCardString += 'ADR:${contactAddress!}\n';
           }
+
           if (contactWebsite != null) {
             formattedVCardString += 'URL:${contactWebsite!}\n';
           }
+
           if (contactNote != null) {
             formattedVCardString += 'NOTE:${contactNote!}\n';
           }
+
           formattedVCardString += 'END:VCARD';
           return formattedVCardString;
         }
 
         qrData = vCardString();
       }
+
       if (qrData != null && contactName != null && contactPhone != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

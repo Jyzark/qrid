@@ -4,6 +4,7 @@ import 'package:regexpattern/regexpattern.dart';
 
 class SMSQRScreen extends StatefulWidget {
   const SMSQRScreen({super.key});
+
   @override
   State<SMSQRScreen> createState() => _SMSQRScreenState();
 }
@@ -11,14 +12,17 @@ class SMSQRScreen extends StatefulWidget {
 class _SMSQRScreenState extends State<SMSQRScreen> {
   var smsPhoneTextField = TextEditingController();
   var smsMessageTextField = TextEditingController();
+
   String? qrData;
   String? smsPhone;
   String? smsMessage;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (smsPhone != null &&
           smsPhone!.isPhone() &&
@@ -27,6 +31,7 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
           smsMessage != null) {
         qrData = 'smsto:$smsPhone:$smsMessage';
       }
+
       if (qrData != null &&
           smsPhone != null &&
           smsPhone!.isPhone() &&

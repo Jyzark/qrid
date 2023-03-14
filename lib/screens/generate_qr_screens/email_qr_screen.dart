@@ -4,23 +4,28 @@ import 'package:regexpattern/regexpattern.dart';
 
 class EmailQRScreen extends StatefulWidget {
   const EmailQRScreen({super.key});
+
   @override
   State<EmailQRScreen> createState() => _EmailQRScreenState();
 }
 
 class _EmailQRScreenState extends State<EmailQRScreen> {
   var emailTextField = TextEditingController();
+
   String? qrData;
   String? email;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (email != null) {
         qrData = 'mailto:$email';
       }
+
       if (qrData != null && email != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

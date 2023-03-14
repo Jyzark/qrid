@@ -10,6 +10,7 @@ import 'package:wakelock/wakelock.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -21,11 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   double _zoomFactor = 0.0;
   BarcodeCapture? capture;
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     Wakelock.enable();
     var scannedHistoryController = ScannedHistoryController();
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(

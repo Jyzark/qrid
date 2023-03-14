@@ -4,23 +4,28 @@ import 'package:regexpattern/regexpattern.dart';
 
 class LinkQRScreen extends StatefulWidget {
   const LinkQRScreen({super.key});
+
   @override
   State<LinkQRScreen> createState() => _LinkQRScreenState();
 }
 
 class _LinkQRScreenState extends State<LinkQRScreen> {
   var urlTextField = TextEditingController();
+
   String? qrData;
   String? url;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (url != null) {
         qrData = url;
       }
+
       if (qrData != null && url != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

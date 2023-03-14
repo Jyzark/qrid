@@ -4,8 +4,13 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:regexpattern/regexpattern.dart';
 
 class ResultContentPreview extends StatelessWidget {
-  const ResultContentPreview({super.key, required this.captureData});
+  const ResultContentPreview({
+    super.key,
+    required this.captureData,
+  });
+
   final BarcodeCapture? captureData;
+
   @override
   Widget build(BuildContext context) {
     if (captureData!.barcodes.first.rawValue!.isUrl()) {
@@ -22,8 +27,13 @@ class ResultContentPreview extends StatelessWidget {
 }
 
 class URLPreview extends StatelessWidget {
-  const URLPreview({super.key, required this.link});
+  const URLPreview({
+    super.key,
+    required this.link,
+  });
+
   final String link;
+
   @override
   Widget build(BuildContext context) {
     return AnyLinkPreview.builder(

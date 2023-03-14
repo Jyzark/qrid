@@ -4,9 +4,11 @@ import 'package:wakelock/wakelock.dart';
 
 class SelectQRScreen extends StatelessWidget {
   const SelectQRScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     Wakelock.disable();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

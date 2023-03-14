@@ -4,6 +4,7 @@ import 'package:regexpattern/regexpattern.dart';
 
 class MeCardQRScreen extends StatefulWidget {
   const MeCardQRScreen({super.key});
+
   @override
   State<MeCardQRScreen> createState() => _MeCardQRScreenState();
 }
@@ -15,6 +16,7 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
   var meCardEmailTextField = TextEditingController();
   var meCardAddressTextField = TextEditingController();
   var meCardNoteTextField = TextEditingController();
+
   String? qrData;
   String? meCardName;
   String? meCardCompany;
@@ -22,40 +24,50 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
   String? meCardEmail;
   String? meCardAddress;
   String? meCardNote;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (meCardName != null) {
         String meCardString() {
           String formattedMeCardString = '';
           formattedMeCardString += 'MECARD:';
           formattedMeCardString += 'N:${meCardName!};';
+
           if (meCardCompany != null) {
             formattedMeCardString += 'ORG:${meCardCompany!};';
           }
+
           if (meCardPhone != null) {
             formattedMeCardString += 'TEL:${meCardPhone!};';
           }
+
           if (meCardEmail != null) {
             formattedMeCardString += 'EMAIL:${meCardEmail!};';
           }
+
           if (meCardAddress != null) {
             formattedMeCardString += 'ADR:${meCardAddress!};';
           }
+
           if (meCardNote != null) {
             formattedMeCardString += 'NOTE:${meCardNote!};';
           }
+
           formattedMeCardString += ';';
           return formattedMeCardString;
         }
 
         qrData = meCardString();
       }
+
       if (qrData != null && meCardName != null) {
         var generatedHistoryController = GeneratedHistoryController();
+
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton(

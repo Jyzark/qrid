@@ -6,9 +6,11 @@ class QRTypeListTile extends StatelessWidget {
       required this.typeIcon,
       required this.typeTitle,
       required this.onTap});
+
   final String typeTitle;
   final IconData typeIcon;
   final void Function()? onTap;
+
   @override
   Widget build(BuildContext context) {
     return Material(

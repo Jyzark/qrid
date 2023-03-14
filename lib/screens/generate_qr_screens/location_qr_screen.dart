@@ -4,6 +4,7 @@ import 'package:regexpattern/regexpattern.dart';
 
 class LocationQRScreen extends StatefulWidget {
   const LocationQRScreen({super.key});
+
   @override
   State<LocationQRScreen> createState() => _LocationQRScreenState();
 }
@@ -11,18 +12,22 @@ class LocationQRScreen extends StatefulWidget {
 class _LocationQRScreenState extends State<LocationQRScreen> {
   var latitudeTextField = TextEditingController();
   var longitudeTextField = TextEditingController();
+
   String? qrData;
   String? locationLatitude;
   String? locationLongitude;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (locationLatitude != null && locationLongitude != null) {
         qrData = 'geo:$locationLatitude,$locationLongitude';
       }
+
       if (qrData != null &&
           locationLatitude != null &&
           locationLongitude != null) {

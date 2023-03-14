@@ -3,23 +3,28 @@ import 'package:qrid/controllers/generated_history_controller.dart';
 
 class TextQRScreen extends StatefulWidget {
   const TextQRScreen({super.key});
+
   @override
   State<TextQRScreen> createState() => _TextQRScreenState();
 }
 
 class _TextQRScreenState extends State<TextQRScreen> {
   var textTextField = TextEditingController();
+
   String? qrData;
   String? text;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (text != null) {
         qrData = text;
       }
+
       if (qrData != null && text != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

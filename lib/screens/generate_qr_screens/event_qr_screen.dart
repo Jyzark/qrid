@@ -5,6 +5,7 @@ import 'package:qrid/controllers/generated_history_controller.dart';
 
 class EventQRScreen extends StatefulWidget {
   const EventQRScreen({super.key});
+
   @override
   State<EventQRScreen> createState() => _EventQRScreenState();
 }
@@ -30,6 +31,7 @@ class _EventQRScreenState extends State<EventQRScreen> {
   var eventTimezoneInput = TextEditingController();
   var eventLocationInput = TextEditingController();
   var eventSummaryInput = TextEditingController();
+
   String? qrData;
   String? eventTitle;
   String? eventLocation;
@@ -42,31 +44,38 @@ class _EventQRScreenState extends State<EventQRScreen> {
     hour: TimeOfDay.now().hour + 1,
     minute: TimeOfDay.now().minute,
   );
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     String? startDateTime = DateFormat('yyyyMMddTHHmmss').format(
       DateTime(startDate!.year, startDate!.month, startDate!.day,
           startTime!.hour, startTime!.minute, 00),
     );
+
     String? endDateTime = DateFormat('yyyyMMddTHHmmss').format(
       DateTime(endDate!.year, endDate!.month, endDate!.day, endTime!.hour,
           endTime!.minute, 00),
     );
+
     String? allDayStartDate = DateFormat('yyyyMMdd').format(
       DateTime(startDate!.year, startDate!.month, startDate!.day),
     );
+
     String? allDayEndDate = DateFormat('yyyyMMdd').format(
       DateTime(endDate!.year, endDate!.month, endDate!.day),
     );
+
     Widget generateButton() {
       if (eventTitle != null) {
         String eventString() {
           String formattedEventString = '';
           formattedEventString += 'BEGIN:VEVENT\n';
           formattedEventString += 'SUMMARY:${eventTitle!}\n';
+
           if (isAllDay == false) {
             formattedEventString += 'DTSTART:${startDateTime}Z\n';
             formattedEventString += 'DTEND:${endDateTime}Z\n';
@@ -74,18 +83,22 @@ class _EventQRScreenState extends State<EventQRScreen> {
             formattedEventString += 'DTSTART;VALUE=DATE:$allDayStartDate\n';
             formattedEventString += 'DTEND;VALUE=DATE:$allDayEndDate\n';
           }
+
           if (eventLocation != null) {
             formattedEventString += 'LOCATION:${eventLocation!}\n';
           }
+
           if (eventSummary != null) {
             formattedEventString += 'DESCRIPTION:${eventSummary!}\n';
           }
+
           formattedEventString += 'END:VEVENT';
           return formattedEventString;
         }
 
         qrData = eventString();
       }
+
       if (qrData != null && eventTitle != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

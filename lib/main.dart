@@ -30,22 +30,23 @@ class Palette {
   static const MaterialColor swatch = MaterialColor(
     0xff242424,
     <int, Color>{
-      50: Color(0xff202020), //10%
-      100: Color(0xff1d1d1d), //20%
-      200: Color(0xff191919), //30%
-      300: Color(0xff161616), //40%
-      400: Color(0xff121212), //50%
-      500: Color(0xff0e0e0e), //60%
-      600: Color(0xff0b0b0b), //70%
-      700: Color(0xff070707), //80%
-      800: Color(0xff040404), //90%
-      900: Color(0xff000000), //100%
+      50: Color(0xff202020),
+      100: Color(0xff1d1d1d),
+      200: Color(0xff191919),
+      300: Color(0xff161616),
+      400: Color(0xff121212),
+      500: Color(0xff0e0e0e),
+      600: Color(0xff0b0b0b),
+      700: Color(0xff070707),
+      800: Color(0xff040404),
+      900: Color(0xff000000),
     },
   );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

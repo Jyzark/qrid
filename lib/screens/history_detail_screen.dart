@@ -10,12 +10,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
   const HistoryDetailScreen({Key? key}) : super(key: key);
+
   @override
   State<HistoryDetailScreen> createState() => _HistoryDetailScreenState();
 }
 
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   GlobalKey globalKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final args =
@@ -23,6 +25,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     final typeName = args['typeName'];
     final qrData = args['qrData'];
     var resultRawTextField = TextEditingController(text: qrData);
+
     IconData typeIcon() {
       if (typeName == 'Contact') {
         return Icons.account_circle_outlined;

@@ -8,6 +8,7 @@ import 'package:wakelock/wakelock.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
@@ -16,6 +17,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     Wakelock.disable();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -67,6 +69,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
 class ScannedTab extends StatefulWidget {
   const ScannedTab({super.key});
+
   @override
   State<ScannedTab> createState() => _ScannedTabState();
 }
@@ -75,6 +78,7 @@ class _ScannedTabState extends State<ScannedTab> {
   @override
   Widget build(BuildContext context) {
     var scannedHistoryController = ScannedHistoryController();
+
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: scannedHistoryController.getHistory(),
       builder: (context, snapshot) {
@@ -146,6 +150,7 @@ class _ScannedTabState extends State<ScannedTab> {
 
 class GeneratedTab extends StatefulWidget {
   const GeneratedTab({super.key});
+
   @override
   State<GeneratedTab> createState() => _GeneratedTabState();
 }
@@ -154,6 +159,7 @@ class _GeneratedTabState extends State<GeneratedTab> {
   @override
   Widget build(BuildContext context) {
     var generatedHistoryController = GeneratedHistoryController();
+
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: generatedHistoryController.getHistory(),
       builder: (context, snapshot) {

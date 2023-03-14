@@ -4,23 +4,28 @@ import 'package:regexpattern/regexpattern.dart';
 
 class PhoneQRScreen extends StatefulWidget {
   const PhoneQRScreen({super.key});
+
   @override
   State<PhoneQRScreen> createState() => _PhoneQRScreenState();
 }
 
 class _PhoneQRScreenState extends State<PhoneQRScreen> {
   var phoneTextField = TextEditingController();
+
   String? qrData;
   String? phone;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
+
     Widget generateButton() {
       if (phone != null) {
         qrData = 'tel:$phone';
       }
+
       if (qrData != null && phone != null) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(

@@ -7,12 +7,13 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:regexpattern/regexpattern.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/* import 'package:wifi_connector/wifi_connector.dart'; */
 class ResultActionButtons extends StatefulWidget {
   const ResultActionButtons(
       {super.key, required this.captureData, required this.copyText});
+
   final BarcodeCapture? captureData;
   final String copyText;
+
   @override
   State<ResultActionButtons> createState() => _ResultActionButtonsState();
 }
@@ -21,6 +22,7 @@ class _ResultActionButtonsState extends State<ResultActionButtons> {
   @override
   Widget build(BuildContext context) {
     var qrData = widget.captureData!.barcodes.first;
+
     if (qrData.type == BarcodeType.url && qrData.rawValue!.isUrl()) {
       return Column(
         children: [
@@ -379,102 +381,7 @@ class _ResultActionButtonsState extends State<ResultActionButtons> {
           ),
         ],
       );
-    } /*  else if (qrData.type == BarcodeType.wifi) {
-      return Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                if (qrData.wifi!.encryptionType == EncryptionType.open ||
-                    qrData.wifi!.encryptionType == EncryptionType.none) {
-                      
-                  await WifiConnector.connectToWifi(
-                    ssid: qrData.wifi!.ssid!,
-                    isWEP: false,
-                  );
-                } else if (qrData.wifi!.encryptionType == EncryptionType.wep) {
-                  await WifiConnector.connectToWifi(
-                    ssid: qrData.wifi!.ssid!,
-                    password: qrData.wifi!.password,
-                    isWEP: true,
-                  );
-                } else {
-                  await WifiConnector.connectToWifi(
-                    ssid: qrData.wifi!.ssid!,
-                    password: qrData.wifi!.password,
-                    isWEP: false,
-                  );
-                }
-                if (!mounted) return;
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                elevation: 0,
-              ),
-              child: const Text('Connect to Wi-Fi'),
-            ),
-          ),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              Flexible(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Clipboard.setData(
-                        ClipboardData(
-                          text: widget.copyText,
-                        ),
-                      ).then(
-                        (_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              dismissDirection: DismissDirection.horizontal,
-                              content: const Text('Copied to clipboard'),
-                              backgroundColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      elevation: 0,
-                    ),
-                    child: const Text('Copy'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Flexible(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      elevation: 0,
-                    ),
-                    child: const Text('Close'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }  */
-    else if (qrData.type == BarcodeType.geo) {
+    } else if (qrData.type == BarcodeType.geo) {
       return Column(
         children: [
           SizedBox(

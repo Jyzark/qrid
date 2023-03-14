@@ -10,12 +10,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class GenerateQRResultScreen extends StatefulWidget {
   const GenerateQRResultScreen({Key? key}) : super(key: key);
+
   @override
   State<GenerateQRResultScreen> createState() => _GenerateQRResultScreenState();
 }
 
 class _GenerateQRResultScreenState extends State<GenerateQRResultScreen> {
   GlobalKey globalKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> args =
@@ -23,6 +25,7 @@ class _GenerateQRResultScreenState extends State<GenerateQRResultScreen> {
     final String typeName = args['typeName'];
     final String qrData = args['qrData'];
     var resultRawTextField = TextEditingController(text: qrData);
+
     IconData typeIcon() {
       if (typeName == 'Contact') {
         return Icons.account_circle_outlined;
@@ -84,6 +87,13 @@ class _GenerateQRResultScreenState extends State<GenerateQRResultScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popUntil(context, ModalRoute.withName('/select-qr-type'));
+          },
+          icon: const Icon(Icons.arrow_back),
+          color: Theme.of(context).primaryColor,
+        ),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(
