@@ -68,6 +68,9 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
           backgroundColor: Color.fromARGB(255, 36, 36, 36),
         ),
+        tabBarTheme: const TabBarTheme(
+          overlayColor: MaterialStatePropertyAll(Colors.transparent),
+        ),
         timePickerTheme: TimePickerThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
