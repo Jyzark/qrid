@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:qrid/screens/generate_qr_result_screen.dart';
 import 'package:qrid/screens/generate_qr_screens/contact_qr_screen.dart';
 import 'package:qrid/screens/generate_qr_screens/email_qr_screen.dart';
@@ -16,14 +17,24 @@ import 'package:qrid/screens/history_screen.dart';
 import 'package:qrid/screens/home_screen.dart';
 import 'package:qrid/screens/select_qr_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+List<String> testDeviceIds = ['ED1CB57D15981BCF73F45F5E0C608970'];
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+  RequestConfiguration configuration =
+      RequestConfiguration(testDeviceIds: testDeviceIds);
+  MobileAds.instance.updateRequestConfiguration(configuration);
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ),
   );
+
+  runApp(const MyApp());
 }
 
 class Palette {

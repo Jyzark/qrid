@@ -177,28 +177,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 235, 235, 235),
-                    borderRadius: BorderRadius.circular(60),
-                  ),
-                  width: 20,
-                  height: 20,
-                ),
-                const SizedBox(width: 15),
-                Text(
-                  'Data',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 20),
             TextField(
               minLines: 1,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
 class TextQRScreen extends StatefulWidget {
@@ -9,6 +10,8 @@ class TextQRScreen extends StatefulWidget {
 }
 
 class _TextQRScreenState extends State<TextQRScreen> {
+  final _textFormKey = GlobalKey<FormState>();
+
   var textTextField = TextEditingController();
 
   String? qrData;
@@ -21,11 +24,13 @@ class _TextQRScreenState extends State<TextQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (text != null) {
+      if (text != null && _textFormKey.currentState!.validate()) {
         qrData = text;
       }
 
-      if (qrData != null && text != null) {
+      if (qrData != null &&
+          text != null &&
+          _textFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -115,41 +120,37 @@ class _TextQRScreenState extends State<TextQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 2,
-                maxLines: 10,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: textTextField,
-                onChanged: (value) {
-                  setState(() {
-                    text = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    text = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    text = value;
-                  });
-                },
-                keyboardType: TextInputType.multiline,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Text cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter text',
+              Form(
+                key: _textFormKey,
+                child: TextFormField(
+                  minLines: 2,
+                  maxLines: 10,
+                  controller: textTextField,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Text cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      text = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _textFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter text',
+                  ),
                 ),
               ),
             ],

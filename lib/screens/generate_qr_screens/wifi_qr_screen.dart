@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
 class WiFiQRScreen extends StatefulWidget {
@@ -10,6 +11,9 @@ class WiFiQRScreen extends StatefulWidget {
 }
 
 class _WiFiQRScreenState extends State<WiFiQRScreen> {
+  final _networkNameFormKey = GlobalKey<FormState>();
+  final _networkPasswordFormKey = GlobalKey<FormState>();
+
   var networkNameTextField = TextEditingController();
   var networkPasswordTextField = TextEditingController();
 
@@ -30,16 +34,21 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (networkName != null) {
+      if (selectedEncryption != null &&
+          networkName != null &&
+          _networkNameFormKey.currentState!.validate()) {
         String wifiString() {
           String formattedWiFiString = '';
           formattedWiFiString += 'WIFI:';
           formattedWiFiString += 'S:${networkName!};';
-          if (selectedEncryption != 'No Encryption' &&
-              networkPassword != null) {
+          if (selectedEncryption != null &&
+              selectedEncryption != 'No Encryption' &&
+              networkPassword != null &&
+              _networkPasswordFormKey.currentState!.validate()) {
             formattedWiFiString += 'P:${networkPassword!};';
           }
-          if (selectedEncryption != 'No Encryption') {
+          if (selectedEncryption != null &&
+              selectedEncryption != 'No Encryption') {
             formattedWiFiString +=
                 'T:${selectedEncryption!.replaceAll('WPA/WPA2', 'WPA')};';
           }
@@ -50,9 +59,15 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
         qrData = wifiString();
       }
 
-      if (qrData != null && networkName != null) {
+      if (qrData != null &&
+          selectedEncryption != null &&
+          networkName != null &&
+          _networkNameFormKey.currentState!.validate()) {
         String wifiItemTitle() {
-          if (selectedEncryption == 'WPA/WPA2' || selectedEncryption == 'WEP') {
+          if (selectedEncryption == 'WPA/WPA2' &&
+                  _networkPasswordFormKey.currentState!.validate() ||
+              selectedEncryption == 'WEP' &&
+                  _networkPasswordFormKey.currentState!.validate()) {
             return 'Name: $networkName\n'
                 'Password: $networkPassword\n'
                 'Type: $selectedEncryption';
@@ -118,7 +133,7 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
     }
 
     Widget networkPasswordTextFieldWidget() {
-      if (selectedEncryption != 'No Encryption') {
+      if (selectedEncryption != null && selectedEncryption != 'No Encryption') {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -133,37 +148,36 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
+                const Text(
+                  '*',
+                  style: TextStyle(color: Colors.red),
+                ),
               ],
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              controller: networkPasswordTextField,
-              onChanged: (value) {
-                setState(() {
-                  networkPassword = value;
-                });
-              },
-              onSaved: (newValue) {
-                setState(() {
-                  networkPassword = newValue;
-                });
-              },
-              onFieldSubmitted: (value) {
-                setState(() {
-                  networkPassword = value;
-                });
-              },
-              keyboardType: TextInputType.visiblePassword,
-              validator: (value) {
-                if (value!.length < 8) {
-                  return 'Password must contain at least 8 characters';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(20),
-                hintText: 'Enter password',
+            Form(
+              key: _networkPasswordFormKey,
+              child: TextFormField(
+                controller: networkPasswordTextField,
+                keyboardType: TextInputType.visiblePassword,
+                validator: ValidationBuilder(
+                  requiredMessage: 'Password cannot be empty',
+                )
+                    .required()
+                    .minLength(8, 'Password must contain at least 8 characters')
+                    .build(),
+                onChanged: (value) {
+                  setState(() {
+                    networkPassword = value;
+                  });
+                },
+                onFieldSubmitted: (value) {
+                  _networkPasswordFormKey.currentState!.validate();
+                },
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.all(20),
+                  hintText: 'Enter password',
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -208,39 +222,35 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: networkNameTextField,
-                onChanged: (value) {
-                  setState(() {
-                    networkName = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    networkName = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    networkName = value;
-                  });
-                },
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Network name cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter network name',
+              Form(
+                key: _networkNameFormKey,
+                child: TextFormField(
+                  controller: networkNameTextField,
+                  keyboardType: TextInputType.text,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Network name cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      networkName = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _networkNameFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter network name',
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -283,17 +293,9 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
                     selectedEncryption = value;
                   });
                 },
-                onSaved: (newValue) {
-                  setState(() {
-                    selectedEncryption = newValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select encryption type';
-                  }
-                  return null;
-                },
+                validator: ValidationBuilder(
+                  requiredMessage: 'Please select encryption type',
+                ).required().build(),
                 dropdownDecoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                 ),

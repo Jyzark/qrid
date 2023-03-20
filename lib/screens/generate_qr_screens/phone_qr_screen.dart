@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class PhoneQRScreen extends StatefulWidget {
   const PhoneQRScreen({super.key});
@@ -10,6 +10,8 @@ class PhoneQRScreen extends StatefulWidget {
 }
 
 class _PhoneQRScreenState extends State<PhoneQRScreen> {
+  final _phoneFormKey = GlobalKey<FormState>();
+
   var phoneTextField = TextEditingController();
 
   String? qrData;
@@ -22,11 +24,13 @@ class _PhoneQRScreenState extends State<PhoneQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (phone != null) {
+      if (phone != null && _phoneFormKey.currentState!.validate()) {
         qrData = 'tel:$phone';
       }
 
-      if (qrData != null && phone != null) {
+      if (qrData != null &&
+          phone != null &&
+          _phoneFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -116,54 +120,43 @@ class _PhoneQRScreenState extends State<PhoneQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.telephoneNumber],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: phoneTextField,
-                onChanged: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
+              Form(
+                key: _phoneFormKey,
+                child: TextFormField(
+                  controller: phoneTextField,
+                  keyboardType: TextInputType.phone,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Phone number cannot be empty',
+                  )
+                      .required()
+                      .phone('Please enter a valid phone number')
+                      .minLength(
+                          5, 'Phone number cannot be less than 5 characters')
+                      .maxLength(
+                          15, 'Phone number cannot be more than 15 characters')
+                      .build(),
+                  onChanged: (value) {
                     setState(() {
                       phone = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isPhone() &&
-                      newValue.length >= 5 &&
-                      newValue.length <= 15) {
-                    setState(() {
-                      phone = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
-                    setState(() {
-                      phone = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (!value!.isPhone() ||
-                      value.length < 5 ||
-                      value.length > 15) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter phone number',
+                  },
+                  onFieldSubmitted: (value) {
+                    _phoneFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter phone number',
+                  ),
                 ),
               ),
             ],

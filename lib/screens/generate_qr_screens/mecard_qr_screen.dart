@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class MeCardQRScreen extends StatefulWidget {
   const MeCardQRScreen({super.key});
@@ -10,6 +10,13 @@ class MeCardQRScreen extends StatefulWidget {
 }
 
 class _MeCardQRScreenState extends State<MeCardQRScreen> {
+  final _meCardNameFormKey = GlobalKey<FormState>();
+  final _meCardCompanyFormKey = GlobalKey<FormState>();
+  final _meCardPhoneFormKey = GlobalKey<FormState>();
+  final _meCardEmailFormKey = GlobalKey<FormState>();
+  final _meCardAddressFormKey = GlobalKey<FormState>();
+  final _meCardNoteFormKey = GlobalKey<FormState>();
+
   var meCardNameTextField = TextEditingController();
   var meCardCompanyTextField = TextEditingController();
   var meCardPhoneTextField = TextEditingController();
@@ -32,7 +39,10 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (meCardName != null) {
+      if (meCardName != null &&
+          meCardPhone != null &&
+          _meCardNameFormKey.currentState!.validate() &&
+          _meCardPhoneFormKey.currentState!.validate()) {
         String meCardString() {
           String formattedMeCardString = '';
           formattedMeCardString += 'MECARD:';
@@ -42,11 +52,10 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
             formattedMeCardString += 'ORG:${meCardCompany!};';
           }
 
-          if (meCardPhone != null) {
-            formattedMeCardString += 'TEL:${meCardPhone!};';
-          }
+          formattedMeCardString += 'TEL:${meCardPhone!};';
 
-          if (meCardEmail != null) {
+          if (meCardEmail != null &&
+              _meCardEmailFormKey.currentState!.validate()) {
             formattedMeCardString += 'EMAIL:${meCardEmail!};';
           }
 
@@ -65,7 +74,11 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
         qrData = meCardString();
       }
 
-      if (qrData != null && meCardName != null) {
+      if (qrData != null &&
+          meCardName != null &&
+          meCardPhone != null &&
+          _meCardNameFormKey.currentState!.validate() &&
+          _meCardPhoneFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
 
         return SizedBox(
@@ -156,40 +169,36 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.name],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardNameTextField,
-                onChanged: (value) {
-                  setState(() {
-                    meCardName = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    meCardName = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    meCardName = value;
-                  });
-                },
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Name cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter name',
+              Form(
+                key: _meCardNameFormKey,
+                child: TextFormField(
+                  controller: meCardNameTextField,
+                  keyboardType: TextInputType.name,
+                  autofillHints: const [AutofillHints.name],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Name cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      meCardName = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _meCardNameFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter name',
+                  ),
                 ),
               ),
             ],
@@ -212,31 +221,23 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.organizationName],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardCompanyTextField,
-                onChanged: (value) {
-                  setState(() {
-                    meCardCompany = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    meCardCompany = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    meCardCompany = value;
-                  });
-                },
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter company',
+              Form(
+                key: _meCardCompanyFormKey,
+                child: TextFormField(
+                  controller: meCardCompanyTextField,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const [AutofillHints.organizationName],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      meCardCompany = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter company',
+                  ),
                 ),
               ),
             ],
@@ -256,54 +257,43 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.telephoneNumber],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardPhoneTextField,
-                onChanged: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
+              Form(
+                key: _meCardPhoneFormKey,
+                child: TextFormField(
+                  controller: meCardPhoneTextField,
+                  keyboardType: TextInputType.phone,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Phone number cannot be empty',
+                  )
+                      .required()
+                      .phone('Please enter a valid phone number')
+                      .minLength(
+                          5, 'Phone number cannot be less than 5 characters')
+                      .maxLength(
+                          15, 'Phone number cannot be more than 15 characters')
+                      .build(),
+                  onChanged: (value) {
                     setState(() {
                       meCardPhone = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isPhone() &&
-                      newValue.length >= 5 &&
-                      newValue.length <= 15) {
-                    setState(() {
-                      meCardPhone = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
-                    setState(() {
-                      meCardPhone = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (!value!.isPhone() ||
-                      value.length < 5 ||
-                      value.length > 15) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter phone number',
+                  },
+                  onFieldSubmitted: (value) {
+                    _meCardPhoneFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter phone number',
+                  ),
                 ),
               ),
             ],
@@ -326,43 +316,29 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.email],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardEmailTextField,
-                onChanged: (value) {
-                  if (value.isEmail()) {
+              Form(
+                key: _meCardEmailFormKey,
+                child: TextFormField(
+                  controller: meCardEmailTextField,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Email Address cannot be empty',
+                  ).email('Please enter a valid email address').build(),
+                  onChanged: (value) {
                     setState(() {
                       meCardEmail = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isEmail()) {
-                    setState(() {
-                      meCardEmail = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isEmail()) {
-                    setState(() {
-                      meCardEmail = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (!value!.isEmail()) {
-                    return 'Please input a valid email adress';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter email address',
+                  },
+                  onFieldSubmitted: (value) {
+                    _meCardEmailFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter email address',
+                  ),
                 ),
               ),
             ],
@@ -385,33 +361,25 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 1,
-                maxLines: 5,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.fullStreetAddress],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardAddressTextField,
-                onChanged: (value) {
-                  setState(() {
-                    meCardAddress = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    meCardAddress = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    meCardAddress = value;
-                  });
-                },
-                keyboardType: TextInputType.streetAddress,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter address',
+              Form(
+                key: _meCardAddressFormKey,
+                child: TextFormField(
+                  minLines: 1,
+                  maxLines: 5,
+                  controller: meCardAddressTextField,
+                  keyboardType: TextInputType.streetAddress,
+                  autofillHints: const [AutofillHints.fullStreetAddress],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      meCardAddress = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter address',
+                  ),
                 ),
               ),
             ],
@@ -434,32 +402,24 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 2,
-                maxLines: 10,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: meCardNoteTextField,
-                onChanged: (value) {
-                  setState(() {
-                    meCardNote = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    meCardNote = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    meCardNote = value;
-                  });
-                },
-                keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter note',
+              Form(
+                key: _meCardNoteFormKey,
+                child: TextFormField(
+                  minLines: 2,
+                  maxLines: 10,
+                  controller: meCardNoteTextField,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      meCardNote = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter note',
+                  ),
                 ),
               ),
             ],

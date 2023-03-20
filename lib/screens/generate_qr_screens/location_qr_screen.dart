@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class LocationQRScreen extends StatefulWidget {
   const LocationQRScreen({super.key});
@@ -10,12 +10,15 @@ class LocationQRScreen extends StatefulWidget {
 }
 
 class _LocationQRScreenState extends State<LocationQRScreen> {
+  final _latitudeFormKey = GlobalKey<FormState>();
+  final _longitudeFormKey = GlobalKey<FormState>();
+
   var latitudeTextField = TextEditingController();
   var longitudeTextField = TextEditingController();
 
   String? qrData;
-  String? locationLatitude;
-  String? locationLongitude;
+  String? latitude;
+  String? longitude;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +27,18 @@ class _LocationQRScreenState extends State<LocationQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (locationLatitude != null && locationLongitude != null) {
-        qrData = 'geo:$locationLatitude,$locationLongitude';
+      if (latitude != null &&
+          longitude != null &&
+          _latitudeFormKey.currentState!.validate() &&
+          _longitudeFormKey.currentState!.validate()) {
+        qrData = 'geo:$latitude,$longitude';
       }
 
       if (qrData != null &&
-          locationLatitude != null &&
-          locationLongitude != null) {
+          latitude != null &&
+          longitude != null &&
+          _latitudeFormKey.currentState!.validate() &&
+          _longitudeFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -38,8 +46,8 @@ class _LocationQRScreenState extends State<LocationQRScreen> {
             onPressed: () {
               generatedHistoryController.addHistory(
                 itemType: typeName,
-                itemTitle: 'Latitude: $locationLatitude\n'
-                    'Longitude: $locationLongitude',
+                itemTitle: 'Latitude: $latitude\n'
+                    'Longitude: $longitude',
                 itemRawData: qrData!,
               );
               Navigator.pushNamed(
@@ -121,40 +129,42 @@ class _LocationQRScreenState extends State<LocationQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.location],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: latitudeTextField,
-                onChanged: (value) {
-                  setState(() {
-                    locationLatitude = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    locationLatitude = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    locationLatitude = value;
-                  });
-                },
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (!value!.isAlphabetNumericSymbol()) {
-                    return 'Please input a valid latitude';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter latitude',
+              Form(
+                key: _latitudeFormKey,
+                child: TextFormField(
+                  controller: latitudeTextField,
+                  keyboardType: TextInputType.number,
+                  autofillHints: const [AutofillHints.location],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Latitude cannot be empty',
+                  )
+                      .required()
+                      .regExp(
+                          RegExp(
+                              r'^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$'),
+                          'Please enter a valid latitude')
+                      .build(),
+                  onChanged: (value) {
+                    setState(() {
+                      latitude = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _latitudeFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter latitude',
+                  ),
                 ),
               ),
             ],
@@ -174,40 +184,42 @@ class _LocationQRScreenState extends State<LocationQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.location],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: longitudeTextField,
-                onChanged: (value) {
-                  setState(() {
-                    locationLongitude = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    locationLongitude = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    locationLongitude = value;
-                  });
-                },
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (!value!.isAlphabetNumericSymbol()) {
-                    return 'Please input a valid longitude';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter longitude',
+              Form(
+                key: _longitudeFormKey,
+                child: TextFormField(
+                  controller: longitudeTextField,
+                  keyboardType: TextInputType.number,
+                  autofillHints: const [AutofillHints.location],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Longitude cannot be empty',
+                  )
+                      .required()
+                      .regExp(
+                          RegExp(
+                              r'^(\+|-)?(?:180(?:(?:\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,6})?))$'),
+                          'Please enter a valid longitude')
+                      .build(),
+                  onChanged: (value) {
+                    setState(() {
+                      longitude = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _longitudeFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter longitude',
+                  ),
                 ),
               ),
             ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class SMSQRScreen extends StatefulWidget {
   const SMSQRScreen({super.key});
@@ -10,6 +10,9 @@ class SMSQRScreen extends StatefulWidget {
 }
 
 class _SMSQRScreenState extends State<SMSQRScreen> {
+  final _smsPhoneFormKey = GlobalKey<FormState>();
+  final _smsMessageFormKey = GlobalKey<FormState>();
+
   var smsPhoneTextField = TextEditingController();
   var smsMessageTextField = TextEditingController();
 
@@ -25,19 +28,17 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
 
     Widget generateButton() {
       if (smsPhone != null &&
-          smsPhone!.isPhone() &&
-          smsPhone!.length >= 5 &&
-          smsPhone!.length <= 15 &&
-          smsMessage != null) {
+          smsMessage != null &&
+          _smsPhoneFormKey.currentState!.validate() &&
+          _smsMessageFormKey.currentState!.validate()) {
         qrData = 'smsto:$smsPhone:$smsMessage';
       }
 
       if (qrData != null &&
           smsPhone != null &&
-          smsPhone!.isPhone() &&
-          smsPhone!.length >= 5 &&
-          smsPhone!.length <= 15 &&
-          smsMessage != null) {
+          smsMessage != null &&
+          _smsPhoneFormKey.currentState!.validate() &&
+          _smsMessageFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -128,42 +129,49 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.telephoneNumber],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: smsPhoneTextField,
-                onChanged: (value) {
-                  setState(() {
-                    smsPhone = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    smsPhone = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    smsPhone = value;
-                  });
-                },
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (!value!.isPhone() ||
-                      value.length < 5 ||
-                      value.length > 15) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter phone number',
+              Form(
+                key: _smsPhoneFormKey,
+                child: TextFormField(
+                  controller: smsPhoneTextField,
+                  keyboardType: TextInputType.phone,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Phone number cannot be empty',
+                  )
+                      .required()
+                      .phone(
+                        'Please enter a valid phone number',
+                      )
+                      .minLength(
+                        5,
+                        'Phone number cannot be less than 5 characters',
+                      )
+                      .maxLength(
+                        15,
+                        'Phone number cannot be more than 15 characters',
+                      )
+                      .build(),
+                  onChanged: (value) {
+                    setState(() {
+                      smsPhone = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _smsPhoneFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter phone number',
+                  ),
                 ),
               ),
             ],
@@ -183,41 +191,37 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 2,
-                maxLines: 10,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: smsMessageTextField,
-                onChanged: (value) {
-                  setState(() {
-                    smsMessage = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    smsMessage = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    smsMessage = value;
-                  });
-                },
-                keyboardType: TextInputType.multiline,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Message cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter message',
+              Form(
+                key: _smsMessageFormKey,
+                child: TextFormField(
+                  minLines: 2,
+                  maxLines: 10,
+                  controller: smsMessageTextField,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Message cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      smsMessage = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _smsMessageFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter message',
+                  ),
                 ),
               ),
             ],

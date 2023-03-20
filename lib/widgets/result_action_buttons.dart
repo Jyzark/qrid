@@ -4,7 +4,6 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:regexpattern/regexpattern.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ResultActionButtons extends StatefulWidget {
@@ -23,7 +22,7 @@ class _ResultActionButtonsState extends State<ResultActionButtons> {
   Widget build(BuildContext context) {
     var qrData = widget.captureData!.barcodes.first;
 
-    if (qrData.type == BarcodeType.url && qrData.rawValue!.isUrl()) {
+    if (qrData.type == BarcodeType.url) {
       return Column(
         children: [
           SizedBox(

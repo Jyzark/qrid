@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class EmailQRScreen extends StatefulWidget {
   const EmailQRScreen({super.key});
@@ -10,6 +10,8 @@ class EmailQRScreen extends StatefulWidget {
 }
 
 class _EmailQRScreenState extends State<EmailQRScreen> {
+  final _emailFormKey = GlobalKey<FormState>();
+
   var emailTextField = TextEditingController();
 
   String? qrData;
@@ -22,11 +24,13 @@ class _EmailQRScreenState extends State<EmailQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (email != null) {
+      if (email != null && _emailFormKey.currentState!.validate()) {
         qrData = 'mailto:$email';
       }
 
-      if (qrData != null && email != null) {
+      if (qrData != null &&
+          email != null &&
+          _emailFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -115,46 +119,39 @@ class _EmailQRScreenState extends State<EmailQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.email],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: emailTextField,
-                onChanged: (value) {
-                  if (value.isEmail()) {
+              Form(
+                key: _emailFormKey,
+                child: TextFormField(
+                  controller: emailTextField,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Email Address cannot be empty',
+                  )
+                      .required()
+                      .email('Please enter a valid email address')
+                      .build(),
+                  onChanged: (value) {
                     setState(() {
                       email = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isEmail()) {
-                    setState(() {
-                      email = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isEmail()) {
-                    setState(() {
-                      email = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (!value!.isEmail()) {
-                    return 'Please input a valid email adress';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter email adress',
+                  },
+                  onFieldSubmitted: (value) {
+                    _emailFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter email adress',
+                  ),
                 ),
               ),
             ],

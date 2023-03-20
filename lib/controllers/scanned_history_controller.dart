@@ -1,7 +1,8 @@
 import 'package:qrid/databases/scanned_history_database.dart';
 import 'package:sqflite/sqflite.dart';
+
 class ScannedHistoryController {
-  DatabaseManager database = DatabaseManager.instance;
+  ScannedHistoryDBManager database = ScannedHistoryDBManager.instance;
   Future<List<Map<String, dynamic>>> getHistory() async {
     Database db = await database.db;
     List<Map<String, dynamic>> historyList = await db.query(
@@ -10,6 +11,7 @@ class ScannedHistoryController {
     );
     return historyList;
   }
+
   Future<void> addHistory({
     required String itemType,
     required String itemTitle,
@@ -24,4 +26,5 @@ class ScannedHistoryController {
         "rawData": itemRawData,
       },
     );
-  }}
+  }
+}

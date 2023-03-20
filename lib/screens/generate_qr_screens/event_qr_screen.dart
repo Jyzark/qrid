@@ -1,5 +1,6 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:intl/intl.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
@@ -11,6 +12,10 @@ class EventQRScreen extends StatefulWidget {
 }
 
 class _EventQRScreenState extends State<EventQRScreen> {
+  final _eventTitleFormKey = GlobalKey<FormState>();
+  final _eventLocationFormKey = GlobalKey<FormState>();
+  final _eventSummaryFormKey = GlobalKey<FormState>();
+
   var eventTitleInput = TextEditingController();
   var eventStartDateInput =
       TextEditingController(text: DateFormat('d/M/y').format(DateTime.now()));
@@ -28,7 +33,6 @@ class _EventQRScreenState extends State<EventQRScreen> {
       minute: TimeOfDay.now().minute,
     ).toString().replaceAll('TimeOfDay(', '').replaceAll(')', ''),
   );
-  var eventTimezoneInput = TextEditingController();
   var eventLocationInput = TextEditingController();
   var eventSummaryInput = TextEditingController();
 
@@ -70,7 +74,7 @@ class _EventQRScreenState extends State<EventQRScreen> {
     );
 
     Widget generateButton() {
-      if (eventTitle != null) {
+      if (eventTitle != null && _eventTitleFormKey.currentState!.validate()) {
         String eventString() {
           String formattedEventString = '';
           formattedEventString += 'BEGIN:VEVENT\n';
@@ -99,7 +103,9 @@ class _EventQRScreenState extends State<EventQRScreen> {
         qrData = eventString();
       }
 
-      if (qrData != null && eventTitle != null) {
+      if (qrData != null &&
+          eventTitle != null &&
+          _eventTitleFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -182,8 +188,8 @@ class _EventQRScreenState extends State<EventQRScreen> {
                       TextFormField(
                         readOnly: true,
                         showCursor: false,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: eventStartTimeInput,
+                        keyboardType: TextInputType.datetime,
                         onTap: () async {
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
@@ -210,7 +216,6 @@ class _EventQRScreenState extends State<EventQRScreen> {
                             });
                           }
                         },
-                        keyboardType: TextInputType.datetime,
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.all(20),
                           hintText: 'Enter start time',
@@ -241,8 +246,8 @@ class _EventQRScreenState extends State<EventQRScreen> {
                       TextFormField(
                         readOnly: true,
                         showCursor: false,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: eventEndTimeInput,
+                        keyboardType: TextInputType.datetime,
                         onTap: () async {
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
@@ -267,7 +272,6 @@ class _EventQRScreenState extends State<EventQRScreen> {
                             });
                           }
                         },
-                        keyboardType: TextInputType.datetime,
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.all(20),
                           hintText: 'Enter end time',
@@ -387,39 +391,35 @@ class _EventQRScreenState extends State<EventQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: eventTitleInput,
-                onChanged: (value) {
-                  setState(() {
-                    eventTitle = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    eventTitle = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    eventTitle = value;
-                  });
-                },
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Title cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter title',
+              Form(
+                key: _eventTitleFormKey,
+                child: TextFormField(
+                  controller: eventTitleInput,
+                  keyboardType: TextInputType.name,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Title cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      eventTitle = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _eventTitleFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter title',
+                  ),
                 ),
               ),
             ],
@@ -472,8 +472,8 @@ class _EventQRScreenState extends State<EventQRScreen> {
                     TextFormField(
                       readOnly: true,
                       showCursor: false,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: eventStartDateInput,
+                      keyboardType: TextInputType.datetime,
                       onTap: () async {
                         var pickedDate = await showCalendarDatePicker2Dialog(
                           context: context,
@@ -491,7 +491,6 @@ class _EventQRScreenState extends State<EventQRScreen> {
                           });
                         }
                       },
-                      keyboardType: TextInputType.datetime,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(20),
                         hintText: 'Enter start date',
@@ -522,8 +521,8 @@ class _EventQRScreenState extends State<EventQRScreen> {
                     TextFormField(
                       readOnly: true,
                       showCursor: false,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: eventEndDateInput,
+                      keyboardType: TextInputType.datetime,
                       onTap: () async {
                         var pickedDate = await showCalendarDatePicker2Dialog(
                           context: context,
@@ -541,7 +540,6 @@ class _EventQRScreenState extends State<EventQRScreen> {
                           });
                         }
                       },
-                      keyboardType: TextInputType.datetime,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(20),
                         hintText: 'Enter end date',
@@ -571,33 +569,25 @@ class _EventQRScreenState extends State<EventQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 1,
-                maxLines: 5,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.location],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: eventLocationInput,
-                onChanged: (value) {
-                  setState(() {
-                    eventLocation = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    eventLocation = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    eventLocation = value;
-                  });
-                },
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter location',
+              Form(
+                key: _eventLocationFormKey,
+                child: TextFormField(
+                  minLines: 1,
+                  maxLines: 5,
+                  controller: eventLocationInput,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const [AutofillHints.location],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      eventLocation = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter location',
+                  ),
                 ),
               ),
             ],
@@ -620,32 +610,24 @@ class _EventQRScreenState extends State<EventQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 2,
-                maxLines: 10,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: eventSummaryInput,
-                onChanged: (value) {
-                  setState(() {
-                    eventSummary = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    eventSummary = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    eventSummary = value;
-                  });
-                },
-                keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter summary',
+              Form(
+                key: _eventSummaryFormKey,
+                child: TextFormField(
+                  minLines: 2,
+                  maxLines: 10,
+                  controller: eventSummaryInput,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      eventSummary = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter summary',
+                  ),
                 ),
               ),
             ],

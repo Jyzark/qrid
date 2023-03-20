@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class ContactQRScreen extends StatefulWidget {
   const ContactQRScreen({super.key});
@@ -10,6 +10,15 @@ class ContactQRScreen extends StatefulWidget {
 }
 
 class _ContactQRScreenState extends State<ContactQRScreen> {
+  final _contactNameFormKey = GlobalKey<FormState>();
+  final _contactCompanyFormKey = GlobalKey<FormState>();
+  final _contactTitleFormKey = GlobalKey<FormState>();
+  final _contactPhoneFormKey = GlobalKey<FormState>();
+  final _contactEmailFormKey = GlobalKey<FormState>();
+  final _contactAddressFormKey = GlobalKey<FormState>();
+  final _contactWebsiteFormKey = GlobalKey<FormState>();
+  final _contactNoteFormKey = GlobalKey<FormState>();
+
   var contactNameTextField = TextEditingController();
   var contactCompanyTextField = TextEditingController();
   var contactTitleTextField = TextEditingController();
@@ -36,7 +45,10 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (contactName != null && contactPhone != null) {
+      if (contactName != null &&
+          contactPhone != null &&
+          _contactNameFormKey.currentState!.validate() &&
+          _contactPhoneFormKey.currentState!.validate()) {
         String vCardString() {
           String formattedVCardString = '';
           formattedVCardString += 'BEGIN:VCARD\n';
@@ -53,7 +65,8 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
 
           formattedVCardString += 'TEL:${contactPhone!}\n';
 
-          if (contactEmail != null) {
+          if (contactEmail != null &&
+              _contactEmailFormKey.currentState!.validate()) {
             formattedVCardString += 'EMAIL:${contactEmail!}\n';
           }
 
@@ -61,7 +74,8 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
             formattedVCardString += 'ADR:${contactAddress!}\n';
           }
 
-          if (contactWebsite != null) {
+          if (contactWebsite != null &&
+              _contactWebsiteFormKey.currentState!.validate()) {
             formattedVCardString += 'URL:${contactWebsite!}\n';
           }
 
@@ -76,7 +90,11 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
         qrData = vCardString();
       }
 
-      if (qrData != null && contactName != null && contactPhone != null) {
+      if (qrData != null &&
+          contactName != null &&
+          contactPhone != null &&
+          _contactNameFormKey.currentState!.validate() &&
+          _contactPhoneFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -166,40 +184,36 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.name],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactNameTextField,
-                onChanged: (value) {
-                  setState(() {
-                    contactName = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    contactName = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    contactName = value;
-                  });
-                },
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Name cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter name',
+              Form(
+                key: _contactNameFormKey,
+                child: TextFormField(
+                  controller: contactNameTextField,
+                  keyboardType: TextInputType.name,
+                  autofillHints: const [AutofillHints.name],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Name cannot be empty',
+                  ).required().build(),
+                  onChanged: (value) {
+                    setState(() {
+                      contactName = value;
+                    });
+                  },
+                  onFieldSubmitted: (value) {
+                    _contactNameFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter name',
+                  ),
                 ),
               ),
             ],
@@ -222,31 +236,23 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.organizationName],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactCompanyTextField,
-                onChanged: (value) {
-                  setState(() {
-                    contactCompany = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    contactCompany = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    contactCompany = value;
-                  });
-                },
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter company',
+              Form(
+                key: _contactCompanyFormKey,
+                child: TextFormField(
+                  controller: contactCompanyTextField,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const [AutofillHints.organizationName],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      contactCompany = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter company',
+                  ),
                 ),
               ),
             ],
@@ -269,31 +275,23 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.jobTitle],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactTitleTextField,
-                onChanged: (value) {
-                  setState(() {
-                    contactTitle = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    contactTitle = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    contactTitle = value;
-                  });
-                },
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter title',
+              Form(
+                key: _contactTitleFormKey,
+                child: TextFormField(
+                  controller: contactTitleTextField,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const [AutofillHints.jobTitle],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      contactTitle = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter title',
+                  ),
                 ),
               ),
             ],
@@ -313,57 +311,43 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.telephoneNumber],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactPhoneTextField,
-                onChanged: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
+              Form(
+                key: _contactPhoneFormKey,
+                child: TextFormField(
+                  controller: contactPhoneTextField,
+                  keyboardType: TextInputType.phone,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'Phone number cannot be empty',
+                  )
+                      .required()
+                      .phone('Please enter a valid phone number')
+                      .minLength(
+                          5, 'Phone number cannot be less than 5 characters')
+                      .maxLength(
+                          15, 'Phone number cannot be more than 15 characters')
+                      .build(),
+                  onChanged: (value) {
                     setState(() {
                       contactPhone = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isPhone() &&
-                      newValue.length >= 5 &&
-                      newValue.length <= 15) {
-                    setState(() {
-                      contactPhone = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isPhone() &&
-                      value.length >= 5 &&
-                      value.length <= 15) {
-                    setState(() {
-                      contactPhone = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null) {
-                    return 'Phone Number cannot be empty';
-                  }
-                  if (!value.isPhone() ||
-                      value.length < 5 ||
-                      value.length > 15) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter phone number',
+                  },
+                  onFieldSubmitted: (value) {
+                    _contactPhoneFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter phone number',
+                  ),
                 ),
               ),
             ],
@@ -386,43 +370,29 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.email],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactEmailTextField,
-                onChanged: (value) {
-                  if (value.isEmail()) {
+              Form(
+                key: _contactEmailFormKey,
+                child: TextFormField(
+                  controller: contactEmailTextField,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder()
+                      .email('Please enter a valid email address')
+                      .build(),
+                  onChanged: (value) {
                     setState(() {
                       contactEmail = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isEmail()) {
-                    setState(() {
-                      contactEmail = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isEmail()) {
-                    setState(() {
-                      contactEmail = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (!value!.isEmail()) {
-                    return 'Please input a valid email adress';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter email address',
+                  },
+                  onFieldSubmitted: (value) {
+                    _contactEmailFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter email address',
+                  ),
                 ),
               ),
             ],
@@ -445,33 +415,25 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 1,
-                maxLines: 5,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.fullStreetAddress],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactAddressTextField,
-                onChanged: (value) {
-                  setState(() {
-                    contactAddress = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    contactAddress = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    contactAddress = value;
-                  });
-                },
-                keyboardType: TextInputType.streetAddress,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter address',
+              Form(
+                key: _contactAddressFormKey,
+                child: TextFormField(
+                  minLines: 1,
+                  maxLines: 5,
+                  controller: contactAddressTextField,
+                  keyboardType: TextInputType.streetAddress,
+                  autofillHints: const [AutofillHints.fullStreetAddress],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      contactAddress = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter address',
+                  ),
                 ),
               ),
             ],
@@ -494,43 +456,29 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.url],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactWebsiteTextField,
-                onChanged: (value) {
-                  if (value.isUrl()) {
+              Form(
+                key: _contactWebsiteFormKey,
+                child: TextFormField(
+                  controller: contactWebsiteTextField,
+                  keyboardType: TextInputType.url,
+                  autofillHints: const [AutofillHints.url],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'URL cannot be empty',
+                  ).url('Please enter a valid URL').build(),
+                  onChanged: (value) {
                     setState(() {
                       contactWebsite = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isUrl()) {
-                    setState(() {
-                      contactWebsite = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isUrl()) {
-                    setState(() {
-                      contactWebsite = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.url,
-                validator: (value) {
-                  if (!value!.isUrl()) {
-                    return 'Please enter a valid URL';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter URL',
+                  },
+                  onFieldSubmitted: (value) {
+                    _contactWebsiteFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter URL',
+                  ),
                 ),
               ),
             ],
@@ -553,32 +501,24 @@ class _ContactQRScreenState extends State<ContactQRScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                minLines: 2,
-                maxLines: 10,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: contactNoteTextField,
-                onChanged: (value) {
-                  setState(() {
-                    contactNote = value;
-                  });
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    contactNote = newValue;
-                  });
-                },
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    contactNote = value;
-                  });
-                },
-                keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter note',
+              Form(
+                key: _contactNoteFormKey,
+                child: TextFormField(
+                  minLines: 2,
+                  maxLines: 10,
+                  controller: contactNoteTextField,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onChanged: (value) {
+                    setState(() {
+                      contactNote = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter note',
+                  ),
                 ),
               ),
             ],

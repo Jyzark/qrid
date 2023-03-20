@@ -1,7 +1,8 @@
 import 'package:qrid/databases/generated_history_database.dart';
 import 'package:sqflite/sqflite.dart';
+
 class GeneratedHistoryController {
-  DatabaseManager database = DatabaseManager.instance;
+  GeneratedHistoryDBManager database = GeneratedHistoryDBManager.instance;
   Future<List<Map<String, dynamic>>> getHistory() async {
     Database db = await database.db;
     List<Map<String, dynamic>> historyList = await db.query(
@@ -10,6 +11,7 @@ class GeneratedHistoryController {
     );
     return historyList;
   }
+
   Future<void> addHistory({
     required String itemType,
     required String itemTitle,

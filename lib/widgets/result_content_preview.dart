@@ -1,7 +1,6 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class ResultContentPreview extends StatelessWidget {
   const ResultContentPreview({
@@ -13,7 +12,7 @@ class ResultContentPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (captureData!.barcodes.first.rawValue!.isUrl()) {
+    if (captureData!.barcodes.first.type == BarcodeType.url) {
       return Column(
         children: [
           URLPreview(link: captureData!.barcodes.first.rawValue!),

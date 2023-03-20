@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
-import 'package:regexpattern/regexpattern.dart';
 
 class LinkQRScreen extends StatefulWidget {
   const LinkQRScreen({super.key});
@@ -10,6 +10,8 @@ class LinkQRScreen extends StatefulWidget {
 }
 
 class _LinkQRScreenState extends State<LinkQRScreen> {
+  final _urlFormKey = GlobalKey<FormState>();
+
   var urlTextField = TextEditingController();
 
   String? qrData;
@@ -22,11 +24,13 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (url != null) {
+      if (url != null && _urlFormKey.currentState!.validate()) {
         qrData = url;
       }
 
-      if (qrData != null && url != null) {
+      if (qrData != null &&
+          url != null &&
+          _urlFormKey.currentState!.validate()) {
         var generatedHistoryController = GeneratedHistoryController();
         return SizedBox(
           width: double.infinity,
@@ -115,50 +119,36 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  const Text(
+                    '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                autofillHints: const [AutofillHints.url],
-                autocorrect: true,
-                enableSuggestions: true,
-                controller: urlTextField,
-                onChanged: (value) {
-                  if (value.isUrl() && value.contains('https://') ||
-                      value.isUrl() && value.contains('http://')) {
+              Form(
+                key: _urlFormKey,
+                child: TextFormField(
+                  controller: urlTextField,
+                  keyboardType: TextInputType.url,
+                  autofillHints: const [AutofillHints.url],
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  validator: ValidationBuilder(
+                    requiredMessage: 'URL cannot be empty',
+                  ).required().url('Please enter a valid URL').build(),
+                  onChanged: (value) {
                     setState(() {
                       url = value;
                     });
-                  }
-                },
-                onSaved: (newValue) {
-                  if (newValue!.isUrl() && newValue.contains('https://') ||
-                      newValue.isUrl() && newValue.contains('http://')) {
-                    setState(() {
-                      url = newValue;
-                    });
-                  }
-                },
-                onFieldSubmitted: (value) {
-                  if (value.isUrl() && value.contains('https://') ||
-                      value.isUrl() && value.contains('http://')) {
-                    setState(() {
-                      url = value;
-                    });
-                  }
-                },
-                keyboardType: TextInputType.url,
-                validator: (value) {
-                  if (!value!.isUrl() && !value.contains('https://') ||
-                      !value.isUrl() && !value.contains('http://')) {
-                    return 'Please enter a valid URL';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(20),
-                  hintText: 'Enter URL',
+                  },
+                  onFieldSubmitted: (value) {
+                    _urlFormKey.currentState!.validate();
+                  },
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: 'Enter URL',
+                  ),
                 ),
               ),
             ],

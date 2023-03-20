@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:qrid/ad_helper.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 import 'package:qrid/controllers/scanned_history_controller.dart';
+import 'package:qrid/databases/generated_history_database.dart';
 import 'package:qrid/databases/scanned_history_database.dart';
 import 'package:qrid/widgets/history_item_listtile.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,9 +17,55 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, _loadBannerAd);
+  }
+
+  Future<void> _loadBannerAd() async {
+    final AnchoredAdaptiveBannerAdSize? adSize =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+      MediaQuery.of(context).size.width.truncate(),
+    );
+
+    _bannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: adSize!,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('Failed to load banner ad: ${error.message}');
+          ad.dispose();
+        },
+      ),
+    );
+    return _bannerAd!.load();
+  }
+
   @override
   Widget build(BuildContext context) {
     Wakelock.disable();
+
+    Widget? adBannerWidget() {
+      if (_bannerAd != null) {
+        return Container(
+          color: Colors.white,
+          width: double.infinity,
+          height: _bannerAd!.size.height.toDouble(),
+          child: AdWidget(ad: _bannerAd!),
+        );
+      } else {
+        return null;
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,6 +103,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
             const Expanded(
               child: TabBarView(
+                physics: NeverScrollableScrollPhysics(),
                 children: [
                   ScannedTab(),
                   GeneratedTab(),
@@ -63,7 +113,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: adBannerWidget(),
     );
+  }
+
+  @override
+  void dispose() {
+    // COMPLETE: Dispose a BannerAd object
+    _bannerAd?.dispose();
+    super.dispose();
   }
 }
 
@@ -105,7 +163,8 @@ class _ScannedTabState extends State<ScannedTab> {
                 itemTitle: data["title"],
                 itemRawData: data["rawData"],
                 onDismissed: (_) async {
-                  DatabaseManager database = DatabaseManager.instance;
+                  ScannedHistoryDBManager database =
+                      ScannedHistoryDBManager.instance;
                   Database db = await database.db;
                   await db.delete("scanned_history",
                       where: "id = ${data["id"]}");
@@ -186,7 +245,8 @@ class _GeneratedTabState extends State<GeneratedTab> {
                 itemTitle: data["title"],
                 itemRawData: data["rawData"],
                 onDismissed: (_) async {
-                  DatabaseManager database = DatabaseManager.instance;
+                  GeneratedHistoryDBManager database =
+                      GeneratedHistoryDBManager.instance;
                   Database db = await database.db;
                   await db.delete("generated_history",
                       where: "id = ${data["id"]}");
