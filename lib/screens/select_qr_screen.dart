@@ -38,6 +38,7 @@ class _SelectQRScreenState extends State<SelectQRScreen> {
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('Failed to load banner ad: ${error.message}');
+          _bannerAd = null;
           ad.dispose();
         },
       ),
@@ -73,6 +74,7 @@ class _SelectQRScreenState extends State<SelectQRScreen> {
               color: Theme.of(context).primaryColor),
         ),
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
       ),
       body: ListView(

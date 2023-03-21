@@ -97,6 +97,7 @@ class _EmailQRScreenState extends State<EmailQRScreen> {
               color: Theme.of(context).primaryColor),
         ),
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
       ),
       body: ListView(

@@ -97,6 +97,7 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
               color: Theme.of(context).primaryColor),
         ),
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
       ),
       body: ListView(
