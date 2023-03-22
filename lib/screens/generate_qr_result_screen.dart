@@ -178,7 +178,7 @@ class _GenerateQRResultScreenState extends State<GenerateQRResultScreen> {
                       data: qrData,
                       gapless: true,
                       padding: const EdgeInsets.all(30),
-                      foregroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.black,
                       backgroundColor: Colors.white,
                     ),
                   ),

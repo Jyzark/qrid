@@ -171,7 +171,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       data: qrData,
                       gapless: true,
                       padding: const EdgeInsets.all(30),
-                      foregroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.black,
                       backgroundColor: Colors.white,
                     ),
                   ),

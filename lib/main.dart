@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:qrid/screens/generate_qr_result_screen.dart';
 import 'package:qrid/screens/generate_qr_screens/contact_qr_screen.dart';
@@ -21,6 +22,9 @@ List<String> testDeviceIds = ['ED1CB57D15981BCF73F45F5E0C608970'];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(
+    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
+  );
   MobileAds.instance.initialize();
   RequestConfiguration configuration =
       RequestConfiguration(testDeviceIds: testDeviceIds);
