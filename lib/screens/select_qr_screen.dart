@@ -37,8 +37,16 @@ class _SelectQRScreenState extends State<SelectQRScreen> {
           });
         },
         onAdFailedToLoad: (ad, error) {
+          setState(() {
+            _bannerAd = null;
+          });
           debugPrint('Failed to load banner ad: ${error.message}');
-          _bannerAd = null;
+          ad.dispose();
+        },
+        onAdClosed: (ad) {
+          setState(() {
+            _bannerAd = null;
+          });
           ad.dispose();
         },
       ),
@@ -52,14 +60,9 @@ class _SelectQRScreenState extends State<SelectQRScreen> {
 
     Widget? adBannerWidget() {
       if (_bannerAd != null) {
-        return Container(
-          color: Colors.white,
-          width: double.infinity,
-          height: _bannerAd!.size.height.toDouble(),
-          child: AdWidget(ad: _bannerAd!),
-        );
+        return AdWidget(ad: _bannerAd!);
       } else {
-        return null;
+        return const SizedBox.shrink();
       }
     }
 

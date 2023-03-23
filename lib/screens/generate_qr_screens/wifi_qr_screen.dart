@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
 class WiFiQRScreen extends StatefulWidget {
@@ -17,15 +16,15 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
   var networkNameTextField = TextEditingController();
   var networkPasswordTextField = TextEditingController();
 
-  String? qrData;
-  String? networkName;
-  String? networkPassword;
+  String qrData = '';
+  String networkName = '';
+  String networkPassword = '';
   final List<String> wifiEncryptions = [
     'WPA/WPA2',
     'WEP',
     'No Encryption',
   ];
-  String? selectedEncryption;
+  String selectedEncryption = '';
 
   @override
   Widget build(BuildContext context) {
@@ -34,24 +33,22 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (selectedEncryption != null &&
-          networkName != null &&
-          _networkNameFormKey.currentState!.validate()) {
+      if (networkName.isNotEmpty && selectedEncryption.isNotEmpty) {
         String wifiString() {
           String formattedWiFiString = '';
           formattedWiFiString += 'WIFI:';
-          formattedWiFiString += 'S:${networkName!};';
-          if (selectedEncryption != null &&
-              selectedEncryption != 'No Encryption' &&
-              networkPassword != null &&
-              _networkPasswordFormKey.currentState!.validate()) {
-            formattedWiFiString += 'P:${networkPassword!};';
+          formattedWiFiString += 'S:$networkName;';
+
+          if (selectedEncryption != 'No Encryption' &&
+              networkPassword.isNotEmpty) {
+            formattedWiFiString += 'P:$networkPassword;';
           }
-          if (selectedEncryption != null &&
-              selectedEncryption != 'No Encryption') {
+
+          if (selectedEncryption != 'No Encryption') {
             formattedWiFiString +=
-                'T:${selectedEncryption!.replaceAll('WPA/WPA2', 'WPA')};';
+                'T:${selectedEncryption.replaceAll('WPA/WPA2', 'WPA')};';
           }
+
           formattedWiFiString += ';';
           return formattedWiFiString;
         }
@@ -59,81 +56,79 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
         qrData = wifiString();
       }
 
-      if (qrData != null &&
-          selectedEncryption != null &&
-          networkName != null &&
-          _networkNameFormKey.currentState!.validate()) {
-        String wifiItemTitle() {
-          if (selectedEncryption == 'WPA/WPA2' &&
-                  _networkPasswordFormKey.currentState!.validate() ||
-              selectedEncryption == 'WEP' &&
-                  _networkPasswordFormKey.currentState!.validate()) {
-            return 'Name: $networkName\n'
-                'Password: $networkPassword\n'
-                'Type: $selectedEncryption';
+      bool isValid() {
+        if (selectedEncryption.isNotEmpty && selectedEncryption == 'WPA/WPA2' ||
+            selectedEncryption.isNotEmpty && selectedEncryption == 'WEP') {
+          if (qrData.isNotEmpty &&
+              networkName.isNotEmpty &&
+              networkPassword.isNotEmpty &&
+              networkPassword.length >= 8 &&
+              _networkNameFormKey.currentState!.validate()) {
+            return true;
           } else {
-            return 'Name: $networkName\n'
-                'Type: $selectedEncryption';
+            return false;
+          }
+        } else {
+          if (qrData.isNotEmpty &&
+              networkName.isNotEmpty &&
+              _networkNameFormKey.currentState!.validate()) {
+            return true;
+          } else {
+            return false;
           }
         }
-
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: wifiItemTitle(),
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
       }
+
+      String wifiItemTitle() {
+        if (selectedEncryption == 'WPA/WPA2' || selectedEncryption == 'WEP') {
+          return 'Name: $networkName\n'
+              'Password: $networkPassword\n'
+              'Type: $selectedEncryption';
+        } else {
+          return 'Name: $networkName\n'
+              'Type: $selectedEncryption';
+        }
+      }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: wifiItemTitle(),
+                    itemRawData: qrData,
+                  );
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     Widget networkPasswordTextFieldWidget() {
-      if (selectedEncryption != null && selectedEncryption != 'No Encryption') {
+      if (selectedEncryption.isNotEmpty &&
+          selectedEncryption != 'No Encryption') {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -157,22 +152,24 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
             const SizedBox(height: 10),
             Form(
               key: _networkPasswordFormKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: TextFormField(
                 controller: networkPasswordTextField,
                 keyboardType: TextInputType.visiblePassword,
-                validator: ValidationBuilder(
-                  requiredMessage: 'Password cannot be empty',
-                )
-                    .required()
-                    .minLength(8, 'Password must contain at least 8 characters')
-                    .build(),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Password cannot be empty';
+                  }
+
+                  if (value.length < 8) {
+                    return 'Password cannot be less than 8 characters';
+                  }
+                  return null;
+                },
                 onChanged: (value) {
                   setState(() {
                     networkPassword = value;
                   });
-                },
-                onFieldSubmitted: (value) {
-                  _networkPasswordFormKey.currentState!.validate();
                 },
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(20),
@@ -184,7 +181,7 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
           ],
         );
       } else {
-        return const SizedBox();
+        return const SizedBox.shrink();
       }
     }
 
@@ -232,21 +229,22 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _networkNameFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: networkNameTextField,
                   keyboardType: TextInputType.text,
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Network name cannot be empty',
-                  ).required().build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Network name cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       networkName = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _networkNameFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),
@@ -291,12 +289,15 @@ class _WiFiQRScreenState extends State<WiFiQRScreen> {
                 iconSize: 30,
                 onChanged: (value) {
                   setState(() {
-                    selectedEncryption = value;
+                    selectedEncryption = value!;
                   });
                 },
-                validator: ValidationBuilder(
-                  requiredMessage: 'Please select encryption type',
-                ).required().build(),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please select encryption type';
+                  }
+                  return null;
+                },
                 dropdownDecoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                 ),

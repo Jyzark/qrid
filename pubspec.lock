@@ -198,13 +198,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  form_validator:
-    dependency: "direct main"
-    description:
-      name: form_validator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.1"
   gallery_saver:
     dependency: "direct main"
     description:
@@ -471,6 +464,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  regexed_validator:
+    dependency: "direct main"
+    description:
+      name: regexed_validator
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0+1"
   shared_preferences:
     dependency: transitive
     description:

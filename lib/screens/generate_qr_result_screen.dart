@@ -88,13 +88,6 @@ class _GenerateQRResultScreenState extends State<GenerateQRResultScreen> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.popUntil(context, ModalRoute.withName('/select-qr-type'));
-          },
-          icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).primaryColor,
-        ),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(

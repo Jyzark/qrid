@@ -201,8 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 String wifiResult() {
-                  String? wifiSSID = scanResult.wifi!.ssid;
-                  String? wifiPass = scanResult.wifi!.password;
+                  String wifiSSID = scanResult.wifi!.ssid!;
+                  String wifiPass = scanResult.wifi!.password!;
                   String wifiType = scanResult.wifi!.encryptionType
                       .toString()
                       .replaceAll('EncryptionType.none', 'None')
@@ -735,12 +735,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    cameraController.dispose();
-    _interstitialAd?.dispose();
-    super.dispose();
   }
 }

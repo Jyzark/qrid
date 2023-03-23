@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
+import 'package:regexed_validator/regexed_validator.dart';
 
 class PhoneQRScreen extends StatefulWidget {
   const PhoneQRScreen({super.key});
@@ -14,8 +14,8 @@ class _PhoneQRScreenState extends State<PhoneQRScreen> {
 
   var phoneTextField = TextEditingController();
 
-  String? qrData;
-  String? phone;
+  String qrData = '';
+  String phone = '';
 
   @override
   Widget build(BuildContext context) {
@@ -24,66 +24,55 @@ class _PhoneQRScreenState extends State<PhoneQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (phone != null && _phoneFormKey.currentState!.validate()) {
+      if (phone.isNotEmpty) {
         qrData = 'tel:$phone';
       }
 
-      if (qrData != null &&
-          phone != null &&
-          _phoneFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: phone!,
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            phone.isNotEmpty &&
+            _phoneFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: phone,
+                    itemRawData: qrData,
+                  );
+
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     return Scaffold(
@@ -130,29 +119,29 @@ class _PhoneQRScreenState extends State<PhoneQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _phoneFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: phoneTextField,
                   keyboardType: TextInputType.phone,
                   autofillHints: const [AutofillHints.telephoneNumber],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Phone number cannot be empty',
-                  )
-                      .required()
-                      .phone('Please enter a valid phone number')
-                      .minLength(
-                          5, 'Phone number cannot be less than 5 characters')
-                      .maxLength(
-                          15, 'Phone number cannot be more than 15 characters')
-                      .build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Phone number cannot be empty';
+                    }
+
+                    if (!validator.phone(value) ||
+                        value.length <= 5 ||
+                        value.length >= 15) {
+                      return 'Please enter a valid phone number';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       phone = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _phoneFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),

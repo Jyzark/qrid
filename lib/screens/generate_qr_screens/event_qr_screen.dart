@@ -1,6 +1,5 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:intl/intl.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
@@ -36,10 +35,10 @@ class _EventQRScreenState extends State<EventQRScreen> {
   var eventLocationInput = TextEditingController();
   var eventSummaryInput = TextEditingController();
 
-  String? qrData;
-  String? eventTitle;
-  String? eventLocation;
-  String? eventSummary;
+  String qrData = '';
+  String eventTitle = '';
+  String eventLocation = '';
+  String eventSummary = '';
   bool isAllDay = false;
   DateTime? startDate = DateTime.now();
   TimeOfDay? startTime = TimeOfDay.now();
@@ -55,30 +54,30 @@ class _EventQRScreenState extends State<EventQRScreen> {
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final typeName = args['title'];
 
-    String? startDateTime = DateFormat('yyyyMMddTHHmmss').format(
+    String startDateTime = DateFormat('yyyyMMddTHHmmss').format(
       DateTime(startDate!.year, startDate!.month, startDate!.day,
           startTime!.hour, startTime!.minute, 00),
     );
 
-    String? endDateTime = DateFormat('yyyyMMddTHHmmss').format(
+    String endDateTime = DateFormat('yyyyMMddTHHmmss').format(
       DateTime(endDate!.year, endDate!.month, endDate!.day, endTime!.hour,
           endTime!.minute, 00),
     );
 
-    String? allDayStartDate = DateFormat('yyyyMMdd').format(
+    String allDayStartDate = DateFormat('yyyyMMdd').format(
       DateTime(startDate!.year, startDate!.month, startDate!.day),
     );
 
-    String? allDayEndDate = DateFormat('yyyyMMdd').format(
+    String allDayEndDate = DateFormat('yyyyMMdd').format(
       DateTime(endDate!.year, endDate!.month, endDate!.day),
     );
 
     Widget generateButton() {
-      if (eventTitle != null && _eventTitleFormKey.currentState!.validate()) {
+      if (eventTitle.isNotEmpty) {
         String eventString() {
           String formattedEventString = '';
           formattedEventString += 'BEGIN:VEVENT\n';
-          formattedEventString += 'SUMMARY:${eventTitle!}\n';
+          formattedEventString += 'SUMMARY:$eventTitle\n';
 
           if (isAllDay == false) {
             formattedEventString += 'DTSTART:${startDateTime}Z\n';
@@ -88,12 +87,12 @@ class _EventQRScreenState extends State<EventQRScreen> {
             formattedEventString += 'DTEND;VALUE=DATE:$allDayEndDate\n';
           }
 
-          if (eventLocation != null) {
-            formattedEventString += 'LOCATION:${eventLocation!}\n';
+          if (eventLocation.isNotEmpty) {
+            formattedEventString += 'LOCATION:$eventLocation\n';
           }
 
-          if (eventSummary != null) {
-            formattedEventString += 'DESCRIPTION:${eventSummary!}\n';
+          if (eventSummary.isNotEmpty) {
+            formattedEventString += 'DESCRIPTION:$eventSummary\n';
           }
 
           formattedEventString += 'END:VEVENT';
@@ -103,62 +102,51 @@ class _EventQRScreenState extends State<EventQRScreen> {
         qrData = eventString();
       }
 
-      if (qrData != null &&
-          eventTitle != null &&
-          _eventTitleFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: eventTitle!,
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            eventTitle.isNotEmpty &&
+            _eventTitleFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: eventTitle,
+                    itemRawData: qrData,
+                  );
+
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     Widget dateTimeTextFieldWidget() {
@@ -286,7 +274,7 @@ class _EventQRScreenState extends State<EventQRScreen> {
           ],
         );
       } else {
-        return const SizedBox();
+        return const SizedBox.shrink();
       }
     }
 
@@ -401,21 +389,22 @@ class _EventQRScreenState extends State<EventQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _eventTitleFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: eventTitleInput,
                   keyboardType: TextInputType.name,
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Title cannot be empty',
-                  ).required().build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Title cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       eventTitle = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _eventTitleFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),

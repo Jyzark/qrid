@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
+import 'package:regexed_validator/regexed_validator.dart';
 
 class MeCardQRScreen extends StatefulWidget {
   const MeCardQRScreen({super.key});
@@ -24,13 +24,13 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
   var meCardAddressTextField = TextEditingController();
   var meCardNoteTextField = TextEditingController();
 
-  String? qrData;
-  String? meCardName;
-  String? meCardCompany;
-  String? meCardPhone;
-  String? meCardEmail;
-  String? meCardAddress;
-  String? meCardNote;
+  String qrData = '';
+  String meCardName = '';
+  String meCardCompany = '';
+  String meCardPhone = '';
+  String meCardEmail = '';
+  String meCardAddress = '';
+  String meCardNote = '';
 
   @override
   Widget build(BuildContext context) {
@@ -39,32 +39,29 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (meCardName != null &&
-          meCardPhone != null &&
-          _meCardNameFormKey.currentState!.validate() &&
-          _meCardPhoneFormKey.currentState!.validate()) {
+      if (meCardName.isNotEmpty && meCardPhone.isNotEmpty) {
         String meCardString() {
           String formattedMeCardString = '';
           formattedMeCardString += 'MECARD:';
-          formattedMeCardString += 'N:${meCardName!};';
+          formattedMeCardString += 'N:$meCardName;';
 
-          if (meCardCompany != null) {
-            formattedMeCardString += 'ORG:${meCardCompany!};';
+          if (meCardCompany.isNotEmpty) {
+            formattedMeCardString += 'ORG:$meCardCompany;';
           }
 
-          formattedMeCardString += 'TEL:${meCardPhone!};';
+          formattedMeCardString += 'TEL:$meCardPhone;';
 
-          if (meCardEmail != null &&
+          if (meCardEmail.isNotEmpty &&
               _meCardEmailFormKey.currentState!.validate()) {
-            formattedMeCardString += 'EMAIL:${meCardEmail!};';
+            formattedMeCardString += 'EMAIL:$meCardEmail;';
           }
 
-          if (meCardAddress != null) {
-            formattedMeCardString += 'ADR:${meCardAddress!};';
+          if (meCardAddress.isNotEmpty) {
+            formattedMeCardString += 'ADR:$meCardAddress;';
           }
 
-          if (meCardNote != null) {
-            formattedMeCardString += 'NOTE:${meCardNote!};';
+          if (meCardNote.isNotEmpty) {
+            formattedMeCardString += 'NOTE:$meCardNote;';
           }
 
           formattedMeCardString += ';';
@@ -74,65 +71,52 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
         qrData = meCardString();
       }
 
-      if (qrData != null &&
-          meCardName != null &&
-          meCardPhone != null &&
-          _meCardNameFormKey.currentState!.validate() &&
-          _meCardPhoneFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: meCardName!,
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            meCardName.isNotEmpty &&
+            meCardPhone.isNotEmpty &&
+            _meCardNameFormKey.currentState!.validate() &&
+            _meCardPhoneFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: meCardName,
+                    itemRawData: qrData,
+                  );
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     return Scaffold(
@@ -179,22 +163,23 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _meCardNameFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: meCardNameTextField,
                   keyboardType: TextInputType.name,
                   autofillHints: const [AutofillHints.name],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Name cannot be empty',
-                  ).required().build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Name cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       meCardName = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _meCardNameFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),
@@ -267,29 +252,29 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _meCardPhoneFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: meCardPhoneTextField,
                   keyboardType: TextInputType.phone,
                   autofillHints: const [AutofillHints.telephoneNumber],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Phone number cannot be empty',
-                  )
-                      .required()
-                      .phone('Please enter a valid phone number')
-                      .minLength(
-                          5, 'Phone number cannot be less than 5 characters')
-                      .maxLength(
-                          15, 'Phone number cannot be more than 15 characters')
-                      .build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Phone number cannot be empty';
+                    }
+
+                    if (!validator.phone(value) ||
+                        value.length <= 5 ||
+                        value.length >= 15) {
+                      return 'Please enter a valid phone number';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       meCardPhone = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _meCardPhoneFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),
@@ -319,22 +304,23 @@ class _MeCardQRScreenState extends State<MeCardQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _meCardEmailFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: meCardEmailTextField,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Email Address cannot be empty',
-                  ).email('Please enter a valid email address').build(),
+                  validator: (value) {
+                    if (!validator.email(value!)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       meCardEmail = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _meCardEmailFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),

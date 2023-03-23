@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
 
 class TextQRScreen extends StatefulWidget {
@@ -14,8 +13,8 @@ class _TextQRScreenState extends State<TextQRScreen> {
 
   var textTextField = TextEditingController();
 
-  String? qrData;
-  String? text;
+  String qrData = '';
+  String text = '';
 
   @override
   Widget build(BuildContext context) {
@@ -24,66 +23,55 @@ class _TextQRScreenState extends State<TextQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (text != null && _textFormKey.currentState!.validate()) {
+      if (text.isNotEmpty) {
         qrData = text;
       }
 
-      if (qrData != null &&
-          text != null &&
-          _textFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: text!,
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            text.isNotEmpty &&
+            _textFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: text,
+                    itemRawData: qrData,
+                  );
+
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     return Scaffold(
@@ -130,6 +118,7 @@ class _TextQRScreenState extends State<TextQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _textFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   minLines: 2,
                   maxLines: 10,
@@ -137,16 +126,16 @@ class _TextQRScreenState extends State<TextQRScreen> {
                   keyboardType: TextInputType.multiline,
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Text cannot be empty',
-                  ).required().build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Text cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       text = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _textFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
+import 'package:regexed_validator/regexed_validator.dart';
 
 class LinkQRScreen extends StatefulWidget {
   const LinkQRScreen({super.key});
@@ -14,8 +14,8 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
 
   var urlTextField = TextEditingController();
 
-  String? qrData;
-  String? url;
+  String qrData = '';
+  String url = '';
 
   @override
   Widget build(BuildContext context) {
@@ -24,66 +24,54 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (url != null && _urlFormKey.currentState!.validate()) {
+      if (url.isNotEmpty) {
         qrData = url;
       }
 
-      if (qrData != null &&
-          url != null &&
-          _urlFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: url!,
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            url.isNotEmpty &&
+            _urlFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: url,
+                    itemRawData: qrData,
+                  );
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     return Scaffold(
@@ -129,22 +117,27 @@ class _LinkQRScreenState extends State<LinkQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _urlFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: urlTextField,
                   keyboardType: TextInputType.url,
                   autofillHints: const [AutofillHints.url],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'URL cannot be empty',
-                  ).required().url('Please enter a valid URL').build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'URL cannot be empty';
+                    }
+
+                    if (!validator.url(value)) {
+                      return 'Please enter a valid URL';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       url = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _urlFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),

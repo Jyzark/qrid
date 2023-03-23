@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:form_validator/form_validator.dart';
 import 'package:qrid/controllers/generated_history_controller.dart';
+import 'package:regexed_validator/regexed_validator.dart';
 
 class SMSQRScreen extends StatefulWidget {
   const SMSQRScreen({super.key});
@@ -16,9 +16,9 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
   var smsPhoneTextField = TextEditingController();
   var smsMessageTextField = TextEditingController();
 
-  String? qrData;
-  String? smsPhone;
-  String? smsMessage;
+  String qrData = '';
+  String smsPhone = '';
+  String smsMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -27,72 +27,58 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
     final typeName = args['title'];
 
     Widget generateButton() {
-      if (smsPhone != null &&
-          smsMessage != null &&
-          _smsPhoneFormKey.currentState!.validate() &&
-          _smsMessageFormKey.currentState!.validate()) {
+      if (smsPhone.isNotEmpty && smsMessage.isNotEmpty) {
         qrData = 'smsto:$smsPhone:$smsMessage';
       }
 
-      if (qrData != null &&
-          smsPhone != null &&
-          smsMessage != null &&
-          _smsPhoneFormKey.currentState!.validate() &&
-          _smsMessageFormKey.currentState!.validate()) {
-        var generatedHistoryController = GeneratedHistoryController();
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              generatedHistoryController.addHistory(
-                itemType: typeName,
-                itemTitle: '$smsPhone\n'
-                    '$smsMessage',
-                itemRawData: qrData!,
-              );
-              Navigator.pushNamed(
-                context,
-                '/generate-qr-result',
-                arguments: {
-                  'typeName': typeName,
-                  'qrData': qrData,
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
-      } else {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: const Text('Generate QR Code'),
-          ),
-        );
+      bool isValid() {
+        if (qrData.isNotEmpty &&
+            smsPhone.isNotEmpty &&
+            smsMessage.isNotEmpty &&
+            _smsPhoneFormKey.currentState!.validate() &&
+            _smsMessageFormKey.currentState!.validate()) {
+          return true;
+        } else {
+          return false;
+        }
       }
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isValid()
+              ? () {
+                  GeneratedHistoryController().addHistory(
+                    itemType: typeName,
+                    itemTitle: '$smsPhone\n'
+                        '$smsMessage',
+                    itemRawData: qrData,
+                  );
+
+                  Navigator.pushNamed(
+                    context,
+                    '/generate-qr-result',
+                    arguments: {
+                      'typeName': typeName,
+                      'qrData': qrData,
+                    },
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 20,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: const Text('Generate QR Code'),
+        ),
+      );
     }
 
     return Scaffold(
@@ -139,35 +125,29 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _smsPhoneFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   controller: smsPhoneTextField,
                   keyboardType: TextInputType.phone,
                   autofillHints: const [AutofillHints.telephoneNumber],
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Phone number cannot be empty',
-                  )
-                      .required()
-                      .phone(
-                        'Please enter a valid phone number',
-                      )
-                      .minLength(
-                        5,
-                        'Phone number cannot be less than 5 characters',
-                      )
-                      .maxLength(
-                        15,
-                        'Phone number cannot be more than 15 characters',
-                      )
-                      .build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Phone number cannot be empty';
+                    }
+
+                    if (!validator.phone(value) ||
+                        value.length <= 5 ||
+                        value.length >= 15) {
+                      return 'Please enter a valid phone number';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       smsPhone = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _smsPhoneFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),
@@ -201,6 +181,7 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
               const SizedBox(height: 10),
               Form(
                 key: _smsMessageFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   minLines: 2,
                   maxLines: 10,
@@ -208,16 +189,16 @@ class _SMSQRScreenState extends State<SMSQRScreen> {
                   keyboardType: TextInputType.multiline,
                   autocorrect: true,
                   enableSuggestions: true,
-                  validator: ValidationBuilder(
-                    requiredMessage: 'Message cannot be empty',
-                  ).required().build(),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Message cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       smsMessage = value;
                     });
-                  },
-                  onFieldSubmitted: (value) {
-                    _smsMessageFormKey.currentState!.validate();
                   },
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(20),
